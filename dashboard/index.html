@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Radar — pre-token protocols ranked by implied value</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <div class="mark" aria-hidden="true">◉</div>
+    <div>
+      <h1>TOKEN RADAR</h1>
+      <p class="sub">Pre-token protocols, ranked by what their token would be worth</p>
+    </div>
+  </div>
+  <div class="meta" id="meta">Loading the snapshot…</div>
+</header>
+
+<nav class="tabs" aria-label="Views">
+  <button class="tab active" data-tab="board" type="button">Board</button>
+  <button class="tab" data-tab="live" type="button">Live tokens</button>
+  <button class="tab" data-tab="model" type="button">The model</button>
+</nav>
+
+<section id="view-board" class="view">
+  <div class="controls" role="search">
+    <label>Search <input id="q" type="search" placeholder="protocol name or slug…" autocomplete="off"></label>
+    <label>Category <select id="f-category"><option value="">All categories</option></select></label>
+    <label>Chain <select id="f-chain"><option value="">All chains</option></select></label>
+    <label>Scope <select id="f-scope">
+      <option value="all">All rows</option>
+      <option value="watchlist">Watchlist only</option>
+      <option value="early">Early finds only</option>
+    </select></label>
+    <label>Sort by <select id="f-sort">
+      <option value="rank">Rank (implied value)</option>
+      <option value="tvl">TVL</option>
+      <option value="growth">7-day growth</option>
+      <option value="age">Age with no token</option>
+      <option value="name">Name A–Z</option>
+    </select></label>
+  </div>
+  <p class="count" id="count"></p>
+  <div class="layout">
+    <div class="tablewrap">
+      <table id="board">
+        <thead><tr>
+          <th data-sort="rank">#</th>
+          <th data-sort="name">Protocol</th>
+          <th data-sort="category">Category</th>
+          <th>Chains</th>
+          <th data-sort="tvl" class="num">TVL</th>
+          <th data-sort="growth" class="num">7d</th>
+          <th data-sort="age" class="num">Age</th>
+          <th data-sort="rank" class="num">Implied value</th>
+        </tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </div>
+  <aside class="detail" id="detail" aria-live="polite">
+    <p class="detail-empty">Select a protocol to see its model breakdown and farm plan.</p>
+  </aside>
+</section>
+
+<section id="view-live" class="view hidden">
+  <p class="note">These protocols already have a token that trades. The market sets their value, so the
+  radar shows the market's own numbers here and never mixes them into the ranked board.</p>
+  <div class="tablewrap">
+    <table id="live-table">
+      <thead><tr><th>Protocol</th><th>Category</th><th>Chains</th><th class="num">TVL</th><th class="num">Market cap</th><th class="num">7d</th></tr></thead>
+      <tbody id="live-rows"></tbody>
+    </table>
+  </div>
+</section>
+
+<section id="view-model" class="view hidden">
+  <h2>How the implied value is built</h2>
+  <p>Every row is scored by the same function, from the snapshot's own figures only. No protocol
+  name is ever special-cased.</p>
+  <pre class="formula">implied = TVL × 0.20
+        × (1 + clamp(7d change, −50%, +150%) × 0.8)      momentum
+        × seasoning(age with no token)                    0.55 + 0.45 × ln(1 + age) / ln(1 + 1460)
+        × (1 + 0.06 × extra chains, up to 5)             breadth
+        × category factor                                 1.15 Dex / Lending / Yield · 1.10 Derivatives
+                                                          1.05 RWA / Staking · 0.85 Bridge · 1.00 other</pre>
+  <h2>What “pre-token” means here</h2>
+  <p>A protocol counts as pre-token when its record carries no token — no market cap, no CoinGecko
+  id, no symbol. That is what the record says, not proof it has none: a protocol on the list may
+  still have a token its record does not carry. The board never predicts whether or when a token
+  is issued; the implied value is the entry's own claim about what one would be worth if the
+  protocol's record stayed as it is.</p>
+  <h2>Reading a farm plan</h2>
+  <p>Each plan is seven steps derived from the protocol's category, chains, TVL and age. Every step
+  states what it costs and how long it takes, with gas budgeted for the chain it runs on. Nothing
+  here is financial advice, and no step ever asks you to pay to claim anything.</p>
+</section>
+
+<footer class="foot">
+  <p>Snapshot <span id="foot-asof"></span> · <span id="foot-src"></span> · Model radar-2 ·
+  Watchlist floor $50,000,000 TVL · Board covers the whole watchlist plus every other rankable
+  pre-token protocol below the floor.</p>
+</footer>
+
+<script src="../data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
